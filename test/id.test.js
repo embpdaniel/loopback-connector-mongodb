@@ -345,8 +345,18 @@ describe('strictObjectIDCoercion', function() {
       {strictObjectIDCoercion: true}
     );
 
+    const User1 = ds.createModel(
+      'user4',
+      {
+        id: {type: String, id: true, mongodb: {dataType: 'objectid'}},
+        name: String,
+      },
+      {strictObjectIDCoercion: true}
+    );
+
     beforeEach(function(done) {
-      User.deleteAll(done);
+      User.deleteAll();
+      User1.deleteAll(done);
     });
 
     it('should coerce to ObjectID', async function() {
@@ -354,9 +364,12 @@ describe('strictObjectIDCoercion', function() {
       user.id.should.be.an.instanceOf(ds.ObjectID);
     });
 
+    it('should coerce to ObjectID (lowercase)', async function() {
+      const user = await User1.create({id: objectIdLikeString, name: 'John'});
+      user.id.should.be.an.instanceOf(ds.ObjectID);
+    });
+
     it('should throw if id is not a ObjectID-like string', async function() {
-      // Why is this not working?
-      // await User.create({id: 'abc', name: 'John'}).should.be.rejectedWith(/not an ObjectID string/);
       try {
         await User.create({id: 'abc', name: 'John'});
       } catch (e) {
